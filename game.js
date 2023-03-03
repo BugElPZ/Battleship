@@ -290,9 +290,18 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
   };
 
   // return resalt attack: -1 - "muff", 0 - "hit", 1 - that ship sunk, 2 - all ships sunk
-  const attack = (x, y) => {
+  const attack = (playerName, x, y) => {
     if (!readyGame()) {
       throw "Game don't ready";
+    };
+    if (queuePlayer1) {
+      if (playerName != namePlayer1) {
+        throw `Now it's the ${namePlayer1}'s turn`;
+      };
+    } else {
+      if (playerName != namePlayer2) {
+        throw `Now it's the ${namePlayer2}'s turn`;
+      };
     };
     if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
       throw `Coordinate ${x}, ${y} uncorrect.`
@@ -374,19 +383,19 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
   let step1AI = [];
   let step2AI = [];
   let stepAfterWound = [];
-  let chooseStep1 = Math.floor(Math.random() * 10) > 4;
+  let chooseStep1 = Math.floor(Math.random() * 10) > 5;
 
   for (let yy = 0; yy < sizeBoard; yy++) {
     for (let xx = 0; xx < sizeBoard; xx++) {
       if (xx % 2 == 0 && yy % 2 == 0 || xx % 2 != 0 && yy % 2 != 0) {
-        step1AI.push(String(xx) + "," + String(yy));
+        step1AI.push([xx,yy]);
       } else {
-        step2AI.push(String(xx) + "," + String(yy));
+        step2AI.push([xx,yy]);
       };
     };
   };
 
-  const ai = () => {
+  const ai = (name) => {
     let result = null;
     if (stepAfterWound.length > 0) {
         const step = [[-1,0],[0,-1],[1,0],[0,1]];
@@ -397,46 +406,96 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
         let x;
         let y;
 
+        if (player2.boardEnemy.stateCell(xx, yy) == "muff") {
+          result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+          x = stepAfterWound[0][0];
+          y = stepAfterWound[0][1];
+        }; 
+
         if (0 <= xx - 1 && xx - 1 < sizeBoard && 0 <= yy && yy < sizeBoard && result == null) {
-          if (player2.board.stateCell(xx - 1, yy) == "hit") {
-            stepAfterWound.push([xx-1,yy]);
-            result = attack(xx+1, yy);
-            x = xx + 1;
-            y = yy; 
-          } else if (player2.board.stateCell(xx - 1, yy) == "null") {
+          if (player2.boardEnemy.stateCell(xx - 1, yy) == "hit") {
+            stepAfterWound = [];
+            let i = xx;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+              i--;
+            };
+            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            i = xx;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+              i++;
+            };
+            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+            x = stepAfterWound[0][0];
+            y = stepAfterWound[0][1];
+            //stepAfterWound.shift();
+          } else if (player2.boardEnemy.stateCell(xx - 1, yy) == "null") {
             tempStack.push([xx-1, yy]);
           };
         };
 
         if (0 <= xx && xx < sizeBoard && 0 <= yy-1 && yy-1 < sizeBoard && result == null) {
-          if (player2.board.stateCell(xx, yy-1) == "hit") {
-            stepAfterWound.push([xx,yy-1]);
-            result = attack(xx, yy+1);
-            x = xx;
-            y = yy + 1;
-          } else if (player2.board.stateCell(xx, yy-1) == "null") {
+          if (player2.boardEnemy.stateCell(xx, yy-1) == "hit") {
+            stepAfterWound = [];
+            let i = yy;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+              i--;
+            };
+            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            i = yy;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+              i++;
+            };
+            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+            x = stepAfterWound[0][0];
+            y = stepAfterWound[0][1];
+            //stepAfterWound.shift();
+          } else if (player2.boardEnemy.stateCell(xx, yy-1) == "null") {
             tempStack.push([xx, yy-1]);
           };
         };
 
         if (0 <= xx + 1 && xx + 1 < sizeBoard && 0 <= yy && yy < sizeBoard && result == null) {
-          if (player2.board.stateCell(xx + 1, yy) == "hit") {
-            stepAfterWound.push([xx+1,yy]);
-            result = attack(xx-1, yy);
-            x = xx-1;
-            y = yy;
-          } else if (player2.board.stateCell(xx + 1, yy) == "null") {
+          if (player2.boardEnemy.stateCell(xx + 1, yy) == "hit") {
+            stepAfterWound = [];
+            let i = xx;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+              i--;
+            };
+            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            i = xx;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+              i++;
+            };
+            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+            x = stepAfterWound[0][0];
+            y = stepAfterWound[0][1];
+            //stepAfterWound.shift();
+          } else if (player2.boardEnemy.stateCell(xx + 1, yy) == "null") {
             tempStack.push([xx+1, yy]);
           };
         };
 
         if (0 <= xx && xx < sizeBoard && 0 <= yy+1 && yy+1 < sizeBoard && result == null) {
-          if (player2.board.stateCell(xx, yy+1) == "hit") {
-            stepAfterWound.push([xx,yy+1]);
-            result = attack(xx, yy-1);
-            x = xx;
-            y = yy-1;
-          } else if (player2.board.stateCell(xx, yy+1) == "null") {
+          if (player2.boardEnemy.stateCell(xx, yy+1) == "hit") {
+            stepAfterWound = [];
+            let i = yy;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+              i--;
+            };
+            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            i = yy;
+            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+              i++;
+            };
+            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+            x = stepAfterWound[0][0];
+            y = stepAfterWound[0][1];
+            //stepAfterWound.shift();
+          } else if (player2.boardEnemy.stateCell(xx, yy+1) == "null") {
             tempStack.push([xx, yy+1]);
           };
         };
@@ -446,22 +505,30 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
         };
 
         if (result == null) {
-          result = attack(stepAfterWound[0][0], stepAfterWound[0][1]);
-          stepAfterWound.pop();
+          result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+          //stepAfterWound.shift();
         } else {
-          if (chooseStep1) {
-            let i = step1AI.indexOf([x, y]);
-            if (i == step1AI.length) {
-              step1AI.pop();
-            } else {
-              step1AI = step1AI.slice(0, i) + step1AI.slice(i+1, step1AI.length);
+          if (x % 2 == 0 && y % 2 == 0 || x % 2 != 0 && y % 2 != 0) {
+            for (let i = 0; i < step1AI.length; i++) {
+              if (step1AI[i][0] == x && step1AI[i][1] == y) {
+                if (i == step1AI.length-1) {
+                  step1AI.pop();
+                } else {
+                  step1AI = step1AI.slice(0, i).concat(step1AI.slice(i+1, step1AI.length));
+                };
+                break;
+              };
             };
           } else {
-            let i = step2AI.indexOf([x, y]);
-            if (i == step2AI.length) {
-              step2AI.pop();
-            } else {
-              step2AI = step2AI.slice(0, i) + step2AI.slice(i+1, step2AI.length);
+            for (let i = 0; i < step2AI.length; i++) {
+              if (step2AI[i][0] == x && step2AI[i][1] == y) {
+                if (i == step2AI.length-1) {
+                  step2AI.pop();
+                } else {
+                  step2AI = step2AI.slice(0, i).concat(step2AI.slice(i+1, step2AI.length));
+                };
+                break;
+              }
             };
           };
         };  
@@ -469,25 +536,25 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
     } else {
       if (chooseStep1 && step1AI.length > 0) {
         let ind = Math.floor(Math.random() * step1AI.length);
-        result = attack(step1AI[ind][0], step1AI[ind][0]);
+        result = attack(name, step1AI[ind][0], step1AI[ind][1]);
         if (result != -1) {
-          stepAfterWound.push([step1AI[ind][0], step1AI[ind][0]]);
+          stepAfterWound.push([step1AI[ind][0], step1AI[ind][1]]);
         };
         if (ind == step1AI.length - 1) {
           step1AI.pop();
         } else {
-          step1AI = step1AI.slice(0, ind) + step1AI.slice(ind + 1, step1AI.length);
+          step1AI = step1AI.slice(0, ind).concat(step1AI.slice(ind + 1, step1AI.length));
         };
       } else {
         let ind = Math.floor(Math.random() * step2AI.length);
-        result = attack(step2AI[ind][0], step2AI[ind][0]);
+        result = attack(name, step2AI[ind][0], step2AI[ind][1]);
         if (result != -1) {
-          stepAfterWound.push([step2AI[ind][0], step2AI[ind][0]]);
+          stepAfterWound.push([step2AI[ind][0], step2AI[ind][1]]);
         };
         if (ind == step2AI.length - 1) {
           step2AI.pop();
         } else {
-          step2AI = step2AI.slice(0, ind) + step2AI.slice(ind + 1, step2AI.length);
+          step2AI = step2AI.slice(0, ind).concat(step2AI.slice(ind + 1, step2AI.length));
         };
       };
     };
