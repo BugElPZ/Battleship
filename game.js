@@ -171,7 +171,7 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
       board[coordinate] = "sunk";
 
       let stack = [[x, y]];
-      let step = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+      let step = [[-1,0],[0,-1],[0,1],[1,0]];
       while (stack.length > 0) {
         let xx = stack[0][0];
         let yy = stack[0][1];
@@ -184,8 +184,6 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
             if (board[c] == "hit") {
               stack.push([newX, newY]);
               board[c] = "sunk";
-            // } else {
-            //   board[c] == "muff";
             };
           };
         };
@@ -397,14 +395,15 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
 
   const ai = (name) => {
     let result = null;
+    let x;
+    let y;
     if (stepAfterWound.length > 0) {
         const step = [[-1,0],[0,-1],[1,0],[0,1]];
         let xx = stepAfterWound[0][0];
         let yy = stepAfterWound[0][1];
         stepAfterWound.shift();
         let tempStack = [];
-        let x;
-        let y;
+
 
         if (player2.boardEnemy.stateCell(xx, yy) == "muff") {
           result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
@@ -560,9 +559,64 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
     };
     if (result == 1) {
       stepAfterWound = [];
+      //removeStepsAfterSunk(x, y);
     };
     return result;
   };
+
+  const removeStepsAfterSunk = (x, y) => {
+    const a = player2.boardEnemy.stateCell(x, y);
+    if (player2.boardEnemy.stateCell(x, y) != "hit") {
+      throw "Method removeStepsAfterSunk() acept coordinate hasn't 'hit'"
+    };
+    let stack = [[x, y]];
+    let step = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+    const listSteps = new Set();
+    while (stack.length > 0) {
+      let xx = stack[0][0];
+      let yy = stack[0][1];
+      stack.shift();
+      for (let i = 0; i < step.length; i++) {
+        const strCoor = String(xx + step[i][0]) + ',' + String(yy + step[i][1]);
+        if (player2.boardEnemy.stateCell(xx + step[i][0], yy + step[i][1]) == "null" && !listSteps.has(strCoor)) {
+          listSteps.add(strCoor);
+        } else if (player2.boardEnemy.stateCell(xx + step[i][0], yy + step[i][1]) == "hit") {
+          stack.push([xx + step[i][0], yy + step[i][1]]);
+        };
+      };
+    };
+    for (const coord of listSteps) {
+      const c = coord.split(',');
+      removeStepsAI(c[0], c[1]);
+    };
+  };
+
+  const removeStepsAI = (x, y) => {
+    if (x % 2 == 0 && y % 2 == 0 || x % 2 != 0 && y % 2 != 0) {
+      for (let i = 0; i < step1AI.length; i++) {
+        if (step1AI[i][0] == x && step1AI[i][1] == y) {
+          if (i == step1AI.length-1) {
+            step1AI.pop();
+          } else {
+            step1AI = step1AI.slice(0, i).concat(step1AI.slice(i+1, step1AI.length));
+          };
+          break;
+        };
+      };
+    } else {
+      for (let i = 0; i < step2AI.length; i++) {
+        if (step2AI[i][0] == x && step2AI[i][1] == y) {
+          if (i == step2AI.length-1) {
+            step2AI.pop();
+          } else {
+            step2AI = step2AI.slice(0, i).concat(step2AI.slice(i+1, step2AI.length));
+          };
+          break;
+        }
+      };
+    };
+  };
+
 
   return { getQueue, placementShip, autoPlacementShip, getBoards, readyGame, attack, ai }
 };
@@ -570,10 +624,10 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
 
 module.exports = {ship, gameboard, player, gameBattleShip};
 
-// const game = gameBattleShip("I", "AI");
-// game.autoPlacementShip("I");
-// game.autoPlacementShip("AI");
-// console.log(game.readyGame());
-// console.log(game.getBoards("I"));
-// console.log(game.readyGame());
+const game = gameBattleShip("I", "AI");
+game.autoPlacementShip("I");
+game.autoPlacementShip("AI");
+console.log(game.readyGame());
+console.log(game.getBoards("I"));
+console.log(game.readyGame());
 
