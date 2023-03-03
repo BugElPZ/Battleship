@@ -213,6 +213,7 @@ const player = (name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2,
   };
 
   const randomPlaceShip = () => {
+    board = gameboard(sizeBoard, amountShips);
     for (let i = 0; i < amountShips.length; i++) {
       let place = true;
       let tring = 5000;
@@ -257,12 +258,11 @@ const player = (name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2,
   return {board, boardEnemy, receiveAttack, randomPlaceShip, attack, checkAllShipPlace};
 };
 
-const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) => {
+const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) => {
   const namePlayer1 = p1;
   const namePlayer2 = p2;
 
   // Queue true = Player 1; false = Player 2
-  let queuePlayer1 = true;
   let gameReadyPlayer1 = false;
   let gameReadyPlayer2 = false;
 
@@ -373,27 +373,56 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
   };
 
   const readyGame = () => {
-    return gameReadyPlayer1 && gameReadyPlayer2;
+    return {
+      readyPlayer1: gameReadyPlayer1,
+      readyPlayer2: gameReadyPlayer2,
+    };
   };
 
 
   // Start AI
-  let step1AI = [];
-  let step2AI = [];
-  let stepAfterWound = [];
-  let chooseStep1 = Math.floor(Math.random() * 10) > 5;
+  let step1AIP1 = [];
+  let step2AIP1 = [];
+  let stepAfterWoundP1 = [];
+  let chooseStep1P1 = Math.floor(Math.random() * 10) > 5;
+
+  let step1AIP2 = [];
+  let step2AIP2 = [];
+  let stepAfterWoundP2 = [];
+  let chooseStep1P2 = Math.floor(Math.random() * 10) > 5;
 
   for (let yy = 0; yy < sizeBoard; yy++) {
     for (let xx = 0; xx < sizeBoard; xx++) {
       if (xx % 2 == 0 && yy % 2 == 0 || xx % 2 != 0 && yy % 2 != 0) {
-        step1AI.push([xx,yy]);
+        step1AIP1.push([xx,yy]);
+        step1AIP2.push([xx,yy]);
       } else {
-        step2AI.push([xx,yy]);
+        step2AIP1.push([xx,yy]);
+        step2AIP2.push([xx,yy]);
       };
     };
   };
 
   const ai = (name) => {
+    let step1AI;
+    let step2AI;
+    let stepAfterWound;
+    let chooseStep1;
+    let p;
+    if (name == namePlayer1) {
+      step1AI = step1AIP1;
+      step2AI = step2AIP1;
+      stepAfterWound = stepAfterWoundP1;
+      chooseStep1 = chooseStep1P1;
+      p = player1;
+    } else if (name == namePlayer2) {
+      step1AI = step1AIP2;
+      step2AI = step2AIP2;
+      stepAfterWound = stepAfterWoundP2;
+      chooseStep1 = chooseStep1P2;
+      p = player2;
+    };
+
     let result = null;
     let x;
     let y;
@@ -405,96 +434,92 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
         let tempStack = [];
 
 
-        if (player2.boardEnemy.stateCell(xx, yy) == "muff") {
+        if (p.boardEnemy.stateCell(xx, yy) == "muff") {
           result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
           x = stepAfterWound[0][0];
           y = stepAfterWound[0][1];
         }; 
 
         if (0 <= xx - 1 && xx - 1 < sizeBoard && 0 <= yy && yy < sizeBoard && result == null) {
-          if (player2.boardEnemy.stateCell(xx - 1, yy) == "hit") {
+          if (p.boardEnemy.stateCell(xx - 1, yy) == "hit") {
             stepAfterWound = [];
             let i = xx;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i--;
             };
-            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             i = xx;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i++;
             };
-            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-            //stepAfterWound.shift();
-          } else if (player2.boardEnemy.stateCell(xx - 1, yy) == "null") {
+          } else if (p.boardEnemy.stateCell(xx - 1, yy) == "null") {
             tempStack.push([xx-1, yy]);
           };
         };
 
         if (0 <= xx && xx < sizeBoard && 0 <= yy-1 && yy-1 < sizeBoard && result == null) {
-          if (player2.boardEnemy.stateCell(xx, yy-1) == "hit") {
+          if (p.boardEnemy.stateCell(xx, yy-1) == "hit") {
             stepAfterWound = [];
             let i = yy;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i--;
             };
-            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             i = yy;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i++;
             };
-            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-            //stepAfterWound.shift();
-          } else if (player2.boardEnemy.stateCell(xx, yy-1) == "null") {
+          } else if (p.boardEnemy.stateCell(xx, yy-1) == "null") {
             tempStack.push([xx, yy-1]);
           };
         };
 
         if (0 <= xx + 1 && xx + 1 < sizeBoard && 0 <= yy && yy < sizeBoard && result == null) {
-          if (player2.boardEnemy.stateCell(xx + 1, yy) == "hit") {
+          if (p.boardEnemy.stateCell(xx + 1, yy) == "hit") {
             stepAfterWound = [];
             let i = xx;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i--;
             };
-            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             i = xx;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(i, yy) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i++;
             };
-            (i != xx && player2.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-            //stepAfterWound.shift();
-          } else if (player2.boardEnemy.stateCell(xx + 1, yy) == "null") {
+          } else if (p.boardEnemy.stateCell(xx + 1, yy) == "null") {
             tempStack.push([xx+1, yy]);
           };
         };
 
         if (0 <= xx && xx < sizeBoard && 0 <= yy+1 && yy+1 < sizeBoard && result == null) {
-          if (player2.boardEnemy.stateCell(xx, yy+1) == "hit") {
+          if (p.boardEnemy.stateCell(xx, yy+1) == "hit") {
             stepAfterWound = [];
             let i = yy;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i--;
             };
-            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             i = yy;
-            while (0 <= i && i < sizeBoard - 1 && player2.boardEnemy.stateCell(xx, i) == "hit") {
+            while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i++;
             };
-            (i != yy && player2.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-            //stepAfterWound.shift();
-          } else if (player2.boardEnemy.stateCell(xx, yy+1) == "null") {
+          } else if (p.boardEnemy.stateCell(xx, yy+1) == "null") {
             tempStack.push([xx, yy+1]);
           };
         };
@@ -505,7 +530,6 @@ const gameBattleShip = (p1, p2, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [
 
         if (result == null) {
           result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
-          //stepAfterWound.shift();
         } else {
           if (x % 2 == 0 && y % 2 == 0 || x % 2 != 0 && y % 2 != 0) {
             for (let i = 0; i < step1AI.length; i++) {
