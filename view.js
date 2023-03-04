@@ -159,7 +159,11 @@ const game = () => {
     };
   };
 
+  async function startGame() {
+    await startMenu();
+    await placementOfShips();
+    await battle();
+  };
 
-
-  
+  startGame();
 };
