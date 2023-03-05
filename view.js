@@ -7,11 +7,83 @@ const createView = function() {
     const head = document.createElement("div");
     head.className("head");
     body.appendChild(head);
-    
+    const menu = document.createElement("div");
+    menu.className("menu");
+    body.appendChild(menu);
 
+    const contNamesPlayers = document.createElement("div");
+    contNamesPlayers.className("contNamesPlayers");
+    const contNameP1 = document.createElement("div");
+    const contNameP2 = document.createElement("div");
+    contNameP1.className("contName");
+    contNameP2.className("contName");
+    contNamesPlayers.appendChild(contNameP1);
+    contNamesPlayers.appendChild(contNameP2);
+    const titleNameP1 = document.createElement("div");
+    const titleNameP2 = document.createElement("div");
+    titleNameP1.className("titleName");
+    titleNameP2.className("titleName");
+    titleNameP1.innerHTML("Enter name player 1:");
+    titleNameP2.innerHTML("Enter name player 2:");
+    contNameP1.appendChild(titleNameP1);
+    contNameP2.appendChild(titleNameP2);
+    const inputNameP1 = document.createElement("input");
+    const inputNameP2 = document.createElement("input");
+    inputNameP1.setAttribute('type', 'text');
+    inputNameP2.setAttribute('type', 'text');
+    inputNameP1.id('inputNameP1');
+    inputNameP2.id('inputNameP2');
+    inputNameP1.className("inputName");
+    inputNameP2.className("inputName");
+    contNameP1.appendChild(inputNameP1);
+    contNameP2.appendChild(inputNameP2);
 
+    const contChooseTypeGame = document.createElement("div");
+    contChooseTypeGame.className("contChooseTypeGame");
+    menu.appendChild(contChooseTypeGame);
+    const buttonPvsP = document.createElement("div");
+    buttonPvsP.className("buttonChooseTypeGame");
+    buttonPvsP.id("buttonPvsP");
+    buttonPvsP.innerHTML("Player vs Player");
+    const buttonPvsAI = document.createElement("div");
+    buttonPvsAI.className("buttonChooseTypeGame");
+    buttonPvsAI.id("buttonPvsAI");
+    buttonPvsAI.innerHTML("Player vs Computer");
+    const buttonAIvsAI = document.createElement("div");
+    buttonAIvsAI.className("buttonChooseTypeGame");
+    buttonAIvsAI.id("buttonAIvsAI");
+    buttonAIvsAI.innerHTML("Computer vs Computer");
+    contChooseTypeGame.appendChild(buttonPvsP);
+    contChooseTypeGame.appendChild(buttonPvsAI);
+    contChooseTypeGame.appendChild(buttonAIvsAI);
 
+    const contChoosePriority = document.createElement("div");
+    contChoosePriority.className("contChoosePriority");
+    menu.appendChild(contChoosePriority);
+    const buttonPriorityP1 = document.createElement("div");
+    buttonPriorityP1.className("buttonPriority");
+    buttonPriorityP1.id("buttonPriorityP1");
+    buttonPriorityP1.innerHTML("Player 1");
+    const buttonPriorityP2 = document.createElement("div");
+    buttonPriorityP2.className("buttonPriority");
+    buttonPriorityP2.id("buttonPriorityP2");
+    buttonPriorityP2.innerHTML("Player 2");
+    contChoosePriority.appendChild(buttonPriorityP1);
+    contChoosePriority.appendChild(buttonPriorityP2);
+
+    const startGame = document.createElement("div");
+    startGame.className("startGame");
+    startGame.innerHTML("Start");
+    menu.appendChild(startGame);
+
+    let namePlayer1 = "";
+    let namePlayer2 = "";
+    // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3
+    let type = 1;
+    let queuePlayer1 = true;
   };
+
+
 
   const createBord = function(nameBord, sizeBoard = 10) {
     const container = document.createElement("div");

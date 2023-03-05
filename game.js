@@ -702,10 +702,10 @@ let count1 = 0;
 let count2 = 0;
 let win1 = 0;
 let win2 = 0;
-let repit = 100000;
+let repit = 10000;
 
 for (let i = 0; i < repit; i++) {
-  const game = gameBattleShip("1", "2");
+  const game = gameBattleShip("1", "2", i%2 == 0);
   game.autoPlacementShip("1");
   game.autoPlacementShip("2");
   let result1 = -1;

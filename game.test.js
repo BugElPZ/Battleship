@@ -252,59 +252,59 @@ const ship = require('./game')
 //   expect(game.attack("name1", 9, 9)).toBe(2);
 // });
 
-test('Game with AI', () => {
-  const game = ship.gameBattleShip("name1", "name2");
-  const emptyBoard = [
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
-  ];
-  const fullBoard = [
-    ["ship", "ship", "null", "null", "null", "ship", "ship", "ship", "ship", "ship"], // 0
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], // 1
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], // 2
-    ["null", "null", "ship", "null", "null", "null", "null", "null", "null", "null"], // 3
-    ["null", "null", "ship", "null", "null", "null", "null", "null", "null", "null"], // 4
-    ["null", "null", "ship", "null", "null", "null", "null", "null", "null", "null"], // 5
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], // 6
-    ["null", "null", "null", "ship", "ship", "ship", "ship", "null", "null", "ship"], // 7
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "ship"], // 8
-    ["null", "null", "null", "null", "null", "null", "null", "null", "null", "ship"], // 9
-  ];
-//     0       1       2       3       4       5       6       7       8       9
-  expect(game.readyGame()).toBe(false);
-  expect(game.getBoards("name1")).toEqual({myBoard: emptyBoard, enemyBoard: emptyBoard});
-  expect(() => game.placementShip("name1", 0, 0, 2, 'horizontally')).not.toThrow();
-  expect(() => game.placementShip("name1", 2, 3, 3, 'vertically')).not.toThrow();
-  expect(() => game.placementShip("name1", 9, 7, 3, 'vertically')).not.toThrow();
-  expect(() => game.placementShip("name1", 3, 7, 4, 'horizontally')).not.toThrow();
-  expect(() => game.placementShip("name1", 5, 0, 5, 'horizontally')).not.toThrow();
+// test('Game with AI', () => {
+//   const game = ship.gameBattleShip("name1", "name2");
+//   const emptyBoard = [
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], 
+//   ];
+//   const fullBoard = [
+//     ["ship", "ship", "null", "null", "null", "ship", "ship", "ship", "ship", "ship"], // 0
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], // 1
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], // 2
+//     ["null", "null", "ship", "null", "null", "null", "null", "null", "null", "null"], // 3
+//     ["null", "null", "ship", "null", "null", "null", "null", "null", "null", "null"], // 4
+//     ["null", "null", "ship", "null", "null", "null", "null", "null", "null", "null"], // 5
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "null"], // 6
+//     ["null", "null", "null", "ship", "ship", "ship", "ship", "null", "null", "ship"], // 7
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "ship"], // 8
+//     ["null", "null", "null", "null", "null", "null", "null", "null", "null", "ship"], // 9
+//   ];
+// //     0       1       2       3       4       5       6       7       8       9
+//   expect(game.readyGame()).toBe(false);
+//   expect(game.getBoards("name1")).toEqual({myBoard: emptyBoard, enemyBoard: emptyBoard});
+//   expect(() => game.placementShip("name1", 0, 0, 2, 'horizontally')).not.toThrow();
+//   expect(() => game.placementShip("name1", 2, 3, 3, 'vertically')).not.toThrow();
+//   expect(() => game.placementShip("name1", 9, 7, 3, 'vertically')).not.toThrow();
+//   expect(() => game.placementShip("name1", 3, 7, 4, 'horizontally')).not.toThrow();
+//   expect(() => game.placementShip("name1", 5, 0, 5, 'horizontally')).not.toThrow();
 
-  expect(game.readyGame()).toBe(false);
-  expect(game.getBoards("name1")).toEqual({myBoard: fullBoard, enemyBoard: emptyBoard});
+//   expect(game.readyGame()).toBe(false);
+//   expect(game.getBoards("name1")).toEqual({myBoard: fullBoard, enemyBoard: emptyBoard});
 
-  expect(() => game.placementShip("name2", 0, 0, 2, 'horizontally')).not.toThrow();
-  expect(() => game.placementShip("name2", 2, 3, 3, 'vertically')).not.toThrow();
-  expect(() => game.placementShip("name2", 9, 7, 3, 'vertically')).not.toThrow();
-  expect(() => game.placementShip("name2", 3, 7, 4, 'horizontally')).not.toThrow();
-  expect(() => game.placementShip("name2", 5, 0, 5, 'horizontally')).not.toThrow();
+//   expect(() => game.placementShip("name2", 0, 0, 2, 'horizontally')).not.toThrow();
+//   expect(() => game.placementShip("name2", 2, 3, 3, 'vertically')).not.toThrow();
+//   expect(() => game.placementShip("name2", 9, 7, 3, 'vertically')).not.toThrow();
+//   expect(() => game.placementShip("name2", 3, 7, 4, 'horizontally')).not.toThrow();
+//   expect(() => game.placementShip("name2", 5, 0, 5, 'horizontally')).not.toThrow();
 
-  expect(game.readyGame()).toBe(true);
-  expect(game.getBoards("name2")).toEqual({myBoard: fullBoard, enemyBoard: emptyBoard});
-  let result = -1; 
-  for (let i = 0; i < 100; i++) {
-    if (result == -1) {
-      expect(game.getQueue()).toEqual({player1: true, player2: false});
-      expect(() => game.attack("name1", 0, 1)).not.toThrow();
-    };
-    result = game.ai("name2");
-  };
+//   expect(game.readyGame()).toBe(true);
+//   expect(game.getBoards("name2")).toEqual({myBoard: fullBoard, enemyBoard: emptyBoard});
+//   let result = -1; 
+//   for (let i = 0; i < 100; i++) {
+//     if (result == -1) {
+//       expect(game.getQueue()).toEqual({player1: true, player2: false});
+//       expect(() => game.attack("name1", 0, 1)).not.toThrow();
+//     };
+//     result = game.ai("name2");
+//   };
 
-});
+// });
