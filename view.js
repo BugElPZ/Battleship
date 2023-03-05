@@ -1,8 +1,19 @@
 const { gameBattleShip } = require("./game");
 
-const createView = () => {
+const createView = function() {
+  const body = document.querySelector("body");
 
-  const createBord = (nameBord, sizeBoard = 10) => {
+  const createStartMenu = function() {
+    const head = document.createElement("div");
+    head.className("head");
+    body.appendChild(head);
+    
+
+
+
+  };
+
+  const createBord = function(nameBord, sizeBoard = 10) {
     const container = document.createElement("div");
     const parentElement = document.querySelector(".gamePlac")
     container.className(nameBord);
@@ -24,8 +35,7 @@ const createView = () => {
     };
   };
 
-  const createGamePlace = () => {
-    const body = document.querySelector("body");
+  const createGamePlace = function() {
     const gamePlace = document.createElement("div");
     gamePlace.className("gamePlace");
     body.appendChild(gamePlace);
@@ -44,7 +54,7 @@ const createView = () => {
 //   startChangeOfQueue()
 //   attack() -> coordinate "0,0"
 
-const game = () => {
+const game = function() {
   let namePlayer1;
   let namePlayer2;
   // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3
@@ -167,3 +177,5 @@ const game = () => {
 
   startGame();
 };
+
+game();

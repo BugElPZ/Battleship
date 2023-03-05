@@ -1,16 +1,16 @@
 
-const ship = (len) => {
+const ship = function(len) {
   let lengthShip = len;
   let hitShip = 0;
 
-  const hit = () => {
+  const hit = function() {
     if (hitShip < lengthShip) {
       hitShip++;
     };
     return hitShip;
   };
 
-  const isSunk = () => {
+  const isSunk = function() {
     if (hitShip >= lengthShip) {
       return true;
     };
@@ -21,7 +21,7 @@ const ship = (len) => {
 };
 
 
-const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) => {
+const gameboard = function(sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) {
   let board = {};
   let shipsOnBoard = [];
 
@@ -37,7 +37,7 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
   };
 
   // ship = {x: 0, y:0, size: 1, direction: vertically or horizontally}
-  const placeShip = (startCoordinateX, startCoordinateY, sizeShip, directionShip) => {
+  const placeShip = function(startCoordinateX, startCoordinateY, sizeShip, directionShip) {
     let posibleSize = false;
     let posibleAmountShipIndex = -1;
 
@@ -92,7 +92,10 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
   };
 
   // return: -1 - "muff", 0 - "hit", 1 - that ship sunk, 2 - all ships sunk
-  const receiveAttack = (x, y) => {
+  const receiveAttack = function(x, y) {
+    if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
+      throw `Coordinate ${x}, ${y} uncorrect.`
+    };
     const coordinateShot = String(x) + "," + String(y);
     
     if (board[coordinateShot] == null) {
@@ -116,7 +119,7 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
     };
   };
 
-  const checkAllShipsIsSunk = () => {
+  const checkAllShipsIsSunk = function() {
     for (let i = 0; i < shipsOnBoard.length; i++) {
       if (!shipsOnBoard[i].isSunk()) {
         return false;
@@ -125,7 +128,7 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
     return true;
   };
 
-  const stateBoard = () => {
+  const stateBoard = function() {
     let b = [];
     for (let y = 0; y < sizeBoard; y++) {
       b.push([]);
@@ -145,7 +148,7 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
     return b;
   };
 
-  const stateCell = (x, y) => {
+  const stateCell = function(x, y) {
     if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
       throw `Coordinate ${x}, ${y} uncorrect.`
     };
@@ -161,7 +164,7 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
     };
   };
 
-  const attack = (x, y, result) => {
+  const attack = function(x, y, result) {
     const coordinate = String(x) + "," + String(y);
     if (result == -1) {
       board[coordinate] = "muff";
@@ -191,36 +194,47 @@ const gameboard = (sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]
     };
   };
 
-  return {placeShip, receiveAttack, checkAllShipsIsSunk, stateBoard, stateCell, attack}
+  const clearBoard = function() {
+    //board = {};
+    shipsOnBoard = [];
+    for (let y = 0; y < sizeBoard; y++) {
+      for (let x = 0; x < sizeBoard; x++) {
+        const coordinateProperty = String(x) + "," + String(y);
+        board[coordinateProperty] = null
+      };
+    };
+  };
+
+  return {placeShip, receiveAttack, checkAllShipsIsSunk, stateBoard, stateCell, attack, clearBoard}
 };
 
-const player = (name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) => {
+const player = function(name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) {
   let board = gameboard(sizeBoard, amountShips);
   let boardEnemy = gameboard();
 
-  const receiveAttack = (x, y) => {
+  const receiveAttack = function(x, y) {
     if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
       throw `Coordinate ${x}, ${y} uncorrect.`
     };
     return board.receiveAttack(x, y);
   };
 
-  const attack = (x, y, result) => {
+  const attack = function(x, y, result) {
     if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
       throw `Coordinate ${x}, ${y} uncorrect.`
     };
     boardEnemy.attack(x, y, result);
   };
 
-  const randomPlaceShip = () => {
-    board = gameboard(sizeBoard, amountShips);
+  const randomPlaceShip = function() {
+    board.clearBoard();
     for (let i = 0; i < amountShips.length; i++) {
       let place = true;
       let tring = 5000;
       while (place) {
         tring--;
         if (tring < 0) {
-          board = gameboard(sizeBoard, amountShips);
+          board.clearBoard();
           return false;
         };
         let direction = (Math.floor(Math.random() * 10) > 4) ? 'horizontally' : 'vertically';
@@ -246,7 +260,7 @@ const player = (name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2,
     return true;
   };
 
-  const checkAllShipPlace = () => {
+  const checkAllShipPlace = function() {
     for (let i = 0; i < amountShips.length; i++) {
       if (amountShips[i][1] > 0) {
         return false;
@@ -258,7 +272,7 @@ const player = (name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2,
   return {board, boardEnemy, receiveAttack, randomPlaceShip, attack, checkAllShipPlace};
 };
 
-const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) => {
+const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) {
   const namePlayer1 = p1;
   const namePlayer2 = p2;
 
@@ -266,7 +280,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
   let gameReadyPlayer1 = false;
   let gameReadyPlayer2 = false;
 
-  const copyAmountShips = (arr) => {
+  const copyAmountShips = function(arr) {
     let arr1 = [];
     for (let i = 0; i < arr.length; i++) {
       arr1.push([arr[i][0], arr[i][1]]);
@@ -277,7 +291,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
   const player1 = player(namePlayer1, sizeBoard, copyAmountShips(amountShips));
   const player2 = player(namePlayer2, sizeBoard, copyAmountShips(amountShips));
 
-  const getQueue = () => {
+  const getQueue = function() {
     if (queuePlayer1) {
       return {player1: true,
               player2: false};
@@ -288,7 +302,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
   };
 
   // return resalt attack: -1 - "muff", 0 - "hit", 1 - that ship sunk, 2 - all ships sunk
-  const attack = (playerName, x, y) => {
+  const attack = function(playerName, x, y) {
     if (!readyGame()) {
       throw "Game don't ready";
     };
@@ -301,7 +315,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
         throw `Now it's the ${namePlayer2}'s turn`;
       };
     };
-    if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
+    if (x < 0 || sizeBoard <= x || y < 0 || sizeBoard <= y) {
       throw `Coordinate ${x}, ${y} uncorrect.`
     };
     if (queuePlayer1) {
@@ -327,7 +341,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
     };
   };
 
-  const getBoards = (playerName) => {
+  const getBoards = function(playerName) {
     if (playerName == namePlayer1) {
       return { myBoard: player1.board.stateBoard(), enemyBoard: player1.boardEnemy.stateBoard() };
     } else if (playerName == namePlayer2) {
@@ -337,7 +351,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
     };
   };
 
-  const placementShip = (playerName, x, y, size, direction) => {
+  const placementShip = function(playerName, x, y, size, direction) {
     if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
       throw `Coordinate ${x}, ${y} uncorrect.`
     };
@@ -356,7 +370,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
     };
   };
 
-  const autoPlacementShip = (playerName) => {
+  const autoPlacementShip = function(playerName) {
     if (playerName == namePlayer1) {
       player1.randomPlaceShip();
       if (player1.checkAllShipPlace()) {
@@ -372,7 +386,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
     };
   };
 
-  const readyGame = () => {
+  const readyGame = function() {
     return {
       readyPlayer1: gameReadyPlayer1,
       readyPlayer2: gameReadyPlayer2,
@@ -384,7 +398,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
   let step1AIP1 = [];
   let step2AIP1 = [];
   let stepAfterWoundP1 = [];
-  let chooseStep1P1 = Math.floor(Math.random() * 10) > 5;
+  let chooseStep1P1 = Math.floor(Math.random() * 10) > 4;
 
   let step1AIP2 = [];
   let step2AIP2 = [];
@@ -403,7 +417,7 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
     };
   };
 
-  const ai = (name) => {
+  const ai = function(name) {
     let step1AI;
     let step2AI;
     let stepAfterWound;
@@ -447,12 +461,12 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i--;
             };
-            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             i = xx;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i++;
             };
-            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
@@ -468,12 +482,12 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i--;
             };
-            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             i = yy;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i++;
             };
-            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
@@ -489,12 +503,12 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i--;
             };
-            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             i = xx;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i++;
             };
-            (i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
@@ -510,12 +524,12 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i--;
             };
-            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             i = yy;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i++;
             };
-            (i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
@@ -581,41 +595,70 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
         };
       };
     };
-    if (result == 1) {
+    if (result == 1 || result == 2) {
       stepAfterWound = [];
-      //removeStepsAfterSunk(x, y);
+    };
+    if (result == 1 && 0 <= x && x < sizeBoard && 0 <= y && y < sizeBoard) {
+      removeStepsAfterSunk(name, x, y);
+    };
+    if (name == namePlayer1) {
+      step1AIP1 = step1AI;
+      step2AIP1 = step2AI;
+      stepAfterWoundP1 = stepAfterWound;
+      chooseStep1P1 = chooseStep1;
+    } else if (name == namePlayer2) {
+      step1AIP2 = step1AI;
+      step2AIP2 = step2AI;
+      stepAfterWoundP2 = stepAfterWound;
+      chooseStep1P2 = chooseStep1;
     };
     return result;
   };
 
-  const removeStepsAfterSunk = (x, y) => {
-    const a = player2.boardEnemy.stateCell(x, y);
-    if (player2.boardEnemy.stateCell(x, y) != "hit") {
-      throw "Method removeStepsAfterSunk() acept coordinate hasn't 'hit'"
+  const removeStepsAfterSunk = function(name, x, y) {
+    if (namePlayer1 == name) {
+      p = player1;
+    } else {
+      p = player2;
+    };
+    const a = p.boardEnemy.stateCell(x, y);
+    if (p.boardEnemy.stateCell(x, y) != "ship") {
+      throw `Method removeStepsAfterSunk() acept coordinate x=${x}, y=${y} hasn't 'hit'`
     };
     let stack = [[x, y]];
     let step = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
     const listSteps = new Set();
+    const visited = new Set();
     while (stack.length > 0) {
       let xx = stack[0][0];
       let yy = stack[0][1];
       stack.shift();
       for (let i = 0; i < step.length; i++) {
-        const strCoor = String(xx + step[i][0]) + ',' + String(yy + step[i][1]);
-        if (player2.boardEnemy.stateCell(xx + step[i][0], yy + step[i][1]) == "null" && !listSteps.has(strCoor)) {
-          listSteps.add(strCoor);
-        } else if (player2.boardEnemy.stateCell(xx + step[i][0], yy + step[i][1]) == "hit") {
-          stack.push([xx + step[i][0], yy + step[i][1]]);
+        if (0 <= xx + step[i][0] && xx + step[i][0] < sizeBoard && 0 <= yy + step[i][1] && yy + step[i][1] < sizeBoard) {
+          const strCoor = String(xx + step[i][0]) + ',' + String(yy + step[i][1]);
+          if (p.boardEnemy.stateCell(xx + step[i][0], yy + step[i][1]) == "null" && !listSteps.has(strCoor) && !visited.has(strCoor)) {
+            listSteps.add(strCoor);
+          } else if (p.boardEnemy.stateCell(xx + step[i][0], yy + step[i][1]) == "ship" && !visited.has(strCoor)) {
+            stack.push([xx + step[i][0], yy + step[i][1]]);
+          };
+          visited.add(strCoor);
         };
       };
     };
     for (const coord of listSteps) {
       const c = coord.split(',');
-      removeStepsAI(c[0], c[1]);
+      removeStepsAI(name, c[0], c[1]);
     };
   };
 
-  const removeStepsAI = (x, y) => {
+  const removeStepsAI = function(name, x, y) {
+    if (namePlayer1 == name) {
+      step1AI = step1AIP1;
+      step2AI = step2AIP1;
+    } else {
+      step1AI = step1AIP2;
+      step2AI = step2AIP2;
+    };
     if (x % 2 == 0 && y % 2 == 0 || x % 2 != 0 && y % 2 != 0) {
       for (let i = 0; i < step1AI.length; i++) {
         if (step1AI[i][0] == x && step1AI[i][1] == y) {
@@ -639,6 +682,13 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
         }
       };
     };
+    if (namePlayer1 == name) {
+      step1AIP1 = step1AI;
+      step2AIP1 = step2AI;
+    } else {
+      step1AIP2 = step1AI;
+      step2AIP2 = step2AI;
+    };
   };
 
 
@@ -648,10 +698,42 @@ const gameBattleShip = (p1, p2, queuePlayer1 = true, sizeBoard = 10, amountShips
 
 module.exports = {ship, gameboard, player, gameBattleShip};
 
-const game = gameBattleShip("I", "AI");
-game.autoPlacementShip("I");
-game.autoPlacementShip("AI");
-console.log(game.readyGame());
-console.log(game.getBoards("I"));
+let count1 = 0;
+let count2 = 0;
+let win1 = 0;
+let win2 = 0;
+let repit = 100000;
+
+for (let i = 0; i < repit; i++) {
+  const game = gameBattleShip("1", "2");
+  game.autoPlacementShip("1");
+  game.autoPlacementShip("2");
+  let result1 = -1;
+  let result2 = -1;
+  while (result1 != 2 && result2 != 2) {
+    if (game.getQueue().player1) {
+      result1 = game.ai("1");
+      count1++;
+    } else {
+      result2 = game.ai("2");
+      count2++;
+    };
+    if (result1 == 2) {
+      win1++;
+    };
+    if (result2 == 2) {
+      win2++;
+    };
+  };
+};
+
+console.log(`Number of moves per game Player1: ${count1/repit}`);
+console.log(`Number of moves per game Player2: ${count2/repit}`);
+
+console.log(`Wins Player1: ${(repit - win1) / repit * 100}%`);
+console.log(`Wins Player2: ${(repit - win2) / repit * 100}%`);
+
+
+
 console.log(game.readyGame());
 
