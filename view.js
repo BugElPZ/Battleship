@@ -150,8 +150,17 @@ const createView = function() {
 
   };
 
-  const changeOfQueue = function() {
-
+  const changeOfQueue = function(name) {
+    clearView();
+    const gag = document.createElement("div");
+    gag.className("gag");
+    gag.innerHTML(`Player ${name}, your next move.`);
+    body.appendChild(gag);
+    return new Promise(function(resolve, reject) {
+      gag.addEventListener("click", function() {
+        resolve();
+      }, false)
+    });
   };
 
   const createBord = function(nameBord, sizeBoard = 10) {
@@ -184,7 +193,13 @@ const createView = function() {
 
   };
 
-  return {createStartMenu, };
+  const clearView = function() {
+    while (body.firstChild) {
+      element.removeChild(element.firstChild);
+    };
+  };
+
+  return {createStartMenu, changeOfQueue};
 };
 
 const listener = function() {
