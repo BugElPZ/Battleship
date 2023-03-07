@@ -1,0 +1,14 @@
+.containerBoard {
+  display: grid;
+  grid-template-columns: repeat(11, 20px);
+  grid-template-rows: repeat(11, 20px);
+  background-color: rgb(173, 173, 173);
+};
+
+.cellenemyBoardL {
+  height: 18px;
+  width: 18px;
+  border:ridge;
+
+};
+
