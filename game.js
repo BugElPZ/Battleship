@@ -135,13 +135,13 @@ const gameboard = function(sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2]
       for (let x = 0; x < sizeBoard; x++) {
         const coordinate = String(x) + "," + String(y);
         if (board[coordinate] == null) {
-          b[y][x] = "null";
+          b[x][y] = "null";
         } else if (board[coordinate] == "muff") {
-          b[y][x] = "muff";
+          b[x][y] = "muff";
         } else if (board[coordinate] == "hit") {
-          b[y][x] = "hit";
+          b[x][y] = "hit";
         } else {
-          b[y][x] = "ship";
+          b[x][y] = "ship";
         };
       };
     };
@@ -696,44 +696,44 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
 };
 
 
-module.exports = {ship, gameboard, player, gameBattleShip};
+// module.exports = {ship, gameboard, player, gameBattleShip};
 
-let count1 = 0;
-let count2 = 0;
-let win1 = 0;
-let win2 = 0;
-let repit = 10000;
+// let count1 = 0;
+// let count2 = 0;
+// let win1 = 0;
+// let win2 = 0;
+// let repit = 10000;
 
-for (let i = 0; i < repit; i++) {
-  const game = gameBattleShip("1", "2", i%2 == 0);
-  game.autoPlacementShip("1");
-  game.autoPlacementShip("2");
-  let result1 = -1;
-  let result2 = -1;
-  while (result1 != 2 && result2 != 2) {
-    if (game.getQueue().player1) {
-      result1 = game.ai("1");
-      count1++;
-    } else {
-      result2 = game.ai("2");
-      count2++;
-    };
-    if (result1 == 2) {
-      win1++;
-    };
-    if (result2 == 2) {
-      win2++;
-    };
-  };
-};
+// for (let i = 0; i < repit; i++) {
+//   const game = gameBattleShip("1", "2", i%2 == 0);
+//   game.autoPlacementShip("1");
+//   game.autoPlacementShip("2");
+//   let result1 = -1;
+//   let result2 = -1;
+//   while (result1 != 2 && result2 != 2) {
+//     if (game.getQueue().player1) {
+//       result1 = game.ai("1");
+//       count1++;
+//     } else {
+//       result2 = game.ai("2");
+//       count2++;
+//     };
+//     if (result1 == 2) {
+//       win1++;
+//     };
+//     if (result2 == 2) {
+//       win2++;
+//     };
+//   };
+// };
 
-console.log(`Number of moves per game Player1: ${count1/repit}`);
-console.log(`Number of moves per game Player2: ${count2/repit}`);
+// console.log(`Number of moves per game Player1: ${count1/repit}`);
+// console.log(`Number of moves per game Player2: ${count2/repit}`);
 
-console.log(`Wins Player1: ${(repit - win1) / repit * 100}%`);
-console.log(`Wins Player2: ${(repit - win2) / repit * 100}%`);
+// console.log(`Wins Player1: ${(repit - win1) / repit * 100}%`);
+// console.log(`Wins Player2: ${(repit - win2) / repit * 100}%`);
 
 
 
-console.log(game.readyGame());
+// console.log(game.readyGame());
 
