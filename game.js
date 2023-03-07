@@ -135,13 +135,13 @@ const gameboard = function(sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2]
       for (let x = 0; x < sizeBoard; x++) {
         const coordinate = String(x) + "," + String(y);
         if (board[coordinate] == null) {
-          b[x][y] = "null";
+          b[y][x] = "null";
         } else if (board[coordinate] == "muff") {
-          b[x][y] = "muff";
+          b[y][x] = "muff";
         } else if (board[coordinate] == "hit") {
-          b[x][y] = "hit";
+          b[y][x] = "hit";
         } else {
-          b[x][y] = "ship";
+          b[y][x] = "ship";
         };
       };
     };

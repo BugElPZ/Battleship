@@ -1,14 +1,31 @@
+
+.gamePlace {
+  display: flex;
+  flex-direction: column;
+}
+
+.contBoards {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+}
+
+
 .containerBoard {
   display: grid;
-  grid-template-columns: repeat(11, 20px);
-  grid-template-rows: repeat(11, 20px);
+  grid-template-columns: repeat(11, 25px);
+  grid-template-rows: repeat(11, 25px);
   background-color: rgb(173, 173, 173);
-};
+}
 
-.cellenemyBoardL {
-  height: 18px;
-  width: 18px;
+.cellenemyBoardL, .cellmyBoardL {
   border:ridge;
+  text-align: center;
+}
 
-};
+.legend {
+  text-align: center;
+}
+
+
 

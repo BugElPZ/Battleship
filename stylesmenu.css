@@ -1,0 +1,32 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.contNamesPlayers,
+.contChooseTypeGame,
+.contChoosePriority {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
+  gap: 20px;
+}
+
+.buttonChooseTypeGame {
+  display: flex;
+  border: solid black;
+  width: 190px;
+  height: 30px;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttonPriority {
+  display: flex;
+  border: solid black;
+  width: 190px;
+  height: 30px;
+  justify-content: center;
+  align-items: center;
+}
