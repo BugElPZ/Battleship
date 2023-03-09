@@ -9,6 +9,11 @@ const createView = function() {
     const menu = document.createElement("div");
     menu.className = "menu";
     body.appendChild(menu);
+    const titleNamePlayers = document.createElement("div");
+    titleNamePlayers.className = "titleNamePlayers";
+    titleNamePlayers.textContent = "Enter names players";
+    menu.appendChild(titleNamePlayers);
+
     const contNamesPlayers = document.createElement("div");
     contNamesPlayers.className = "contNamesPlayers";
     menu.appendChild(contNamesPlayers);
@@ -50,15 +55,15 @@ const createView = function() {
     const buttonPvsP = document.createElement("div");
     buttonPvsP.className = "buttonChooseTypeGame";
     buttonPvsP.id = "buttonPvsP";
-    buttonPvsP.innerHTML = "Player vs Player";
+    buttonPvsP.innerHTML = "Player<br>vs<br>Player";
     const buttonPvsAI = document.createElement("div");
     buttonPvsAI.className = "buttonChooseTypeGame";
     buttonPvsAI.id = "buttonPvsAI";
-    buttonPvsAI.innerHTML = "Player vs Computer";
+    buttonPvsAI.innerHTML = "Player<br>vs<br>Computer";
     const buttonAIvsAI = document.createElement("div");
     buttonAIvsAI.className = "buttonChooseTypeGame";
     buttonAIvsAI.id = "buttonAIvsAI";
-    buttonAIvsAI.innerHTML = "Computer vs Computer";
+    buttonAIvsAI.innerHTML = "Computer<br>vs<br>Computer";
     contChooseTypeGame.appendChild(buttonPvsP);
     contChooseTypeGame.appendChild(buttonPvsAI);
     contChooseTypeGame.appendChild(buttonAIvsAI);
@@ -175,7 +180,6 @@ const createView = function() {
     const sizeBoard = board.length;
     const container = document.createElement("div");
     const parentElement = document.querySelector(".contBoards")
-    //container.className = nameBord;
     container.className = `containerBoard ${nameBord}`;
     parentElement.appendChild(container);
     for (let y = 0; y <= sizeBoard; y++) {
@@ -197,8 +201,10 @@ const createView = function() {
             cell.textContent = ".";
           } else if (board[y-1][x-1] == "hit") {
             cell.textContent = "X";
+            cell.className = cellShipClassName(x-1, y-1, board, nameBord);
           } else if (board[y-1][x-1] == "ship") {
-            cell.textContent = "S";
+            cell.className = cellShipClassName(x-1, y-1, board, nameBord);
+            //cell.textContent = "S";
           };
         };
         container.appendChild(cell);
@@ -206,7 +212,33 @@ const createView = function() {
     };
   };
 
-  const createGamePlace = function(name, boards) {
+  // return name class: 0 - none bord, 1 - board; (top - right - bottom - left) cellShip0101
+  const cellShipClassName = function(x, y, board, nameBord) {
+    let cellClassName = `cell${nameBord}L ` + 'cellShip';
+    if (y-1 >= 0 && (board[y-1][x] == "hit" || board[y-1][x] == "ship")) {
+      cellClassName += "0";
+    } else {
+      cellClassName += "1";
+    };
+    if (x + 1 < board.length && (board[y][x+1] == "hit" || board[y][x+1] == "ship")) {
+      cellClassName += "0";
+    } else {
+      cellClassName += "1";
+    };
+    if (y + 1 < board.length && (board[y+1][x] == "hit" || board[y+1][x] == "ship")) {
+      cellClassName += "0";
+    } else {
+      cellClassName += "1";
+    };
+    if (x-1 >= 0 && (board[y][x-1] == "hit" || board[y][x-1] == "ship")) {
+      cellClassName += "0";
+    } else {
+      cellClassName += "1";
+    };
+    return cellClassName;
+  };
+
+  const createGamePlace = function(name, boards, placement, ships) {
     clearView();
     const gamePlace = document.createElement("div");
     gamePlace.className = "gamePlace";
@@ -218,6 +250,46 @@ const createView = function() {
     createBord("myBoard", boards.myBoard);
     createBord("enemyBoard", boards.enemyBoard);
 
+    if (placement) {
+      createPlacement(ships);
+    };
+
+    const buttonNextMove = document.createElement("button");
+    buttonNextMove.className = "buttonNextMove";
+    buttonNextMove.textContent = "Next move";
+    gamePlace.appendChild(buttonNextMove);
+  };
+
+  const createPlacement = function (ships) {
+    const gamePlace = document.querySelector(".gamePlace");
+    const contPlaceShips = document.createElement("div");
+    contPlaceShips.className = "contPlaceShips";
+    gamePlace.appendChild(contPlaceShips);
+    const titlePlaceSips = document.createElement("div");
+    titlePlaceSips.className = "titlePlaceSips";
+    titlePlaceSips.textContent = "Ships:";
+    contPlaceShips.appendChild(titlePlaceSips);
+    for (let i = 0; i < ships.length; i++) {
+      const contShip = document.createElement("div");
+      contShip.className = "contShip";
+      contPlaceShips.appendChild(contShip);
+      const bodyShip = document.createElement("div");
+      bodyShip.setAttribute("draggable", "true");
+      bodyShip.className = "bodyShip";
+      bodyShip.id = "bodyShip" + ships[i][0];
+      contShip.appendChild(bodyShip);
+      for (let j = 0; j < ships[i][0]; j++) {
+        const cellShip = document.createElement("div");
+        cellShip.className = "cellShip cellenemyBoardL";
+        cellShip.id = j;
+        bodyShip.appendChild(cellShip);
+      };
+      const countShip = document.createElement("div");
+      countShip.className = "countShip";
+      countShip.id = "countShip" + ships[i][0];
+      countShip.textContent = " - " + ships[i][1];
+      contShip.appendChild(countShip);
+    };
     const buttonAutoPlaceShip = document.createElement("input");
     buttonAutoPlaceShip.className = "buttonAutoPlaceShip";
     buttonAutoPlaceShip.setAttribute("type", "button");
@@ -292,8 +364,89 @@ const listener = function() {
     });
   };
 
-  const boardPlacement = function() {
+  const boardPlacement = function(amountShips, sizeBoard) {
     let ship = "auto";
+    let ships =[];
+    let idcell = null;
+    let draggedShip;
+    let correctCoordX = 0;
+    let correctCoordY = 0;
+    let direction = "h";
+    let sizeShip = 0;
+    let shipCoordinate = []
+
+    const cell = document.querySelectorAll(".cellShip");
+    cell.forEach(elm => {
+      elm.addEventListener("mousedown", function() {
+        idcell = elm.id;
+      }, false);
+    });
+
+
+
+    const eventShips = document.querySelectorAll(".bodyShip");
+    eventShips.forEach(elm => {elm.addEventListener("drag", function() {
+      sizeShip = Number(elm.id.slice(8, elm.id.length));
+      if (direction == "h") {
+        correctCoordX = -Number(idcell.split('-')[0]);
+      } else {
+
+      }
+      console.log(elm.id);
+      console.log(idcell);
+    })});
+
+    eventShips.forEach(elm => (elm.addEventListener("dragstart", function() {
+      draggedShip = elm;
+    })));
+
+    const cells = document.querySelectorAll(".cellmyBoardL");
+    cells.forEach(elm => {elm.addEventListener("dragenter", function(event) {
+      for (let i = 0; i < shipCoordinate.length; i++) {
+        document.getElementById(String(shipCoordinate[i][0]) + "-" + String(shipCoordinate[i][1])).classList.remove("dropZoneShip");
+      }
+      shipCoordinate = [];
+      let c = event.target.id.split('-');
+      let x = Number(c[0]);
+      let y = Number(c[1]);
+      if (direction == "h") {
+        for (let xx = x + correctCoordX; xx < sizeShip - idcell.split('-')[0] + x; xx++) {
+          if (xx >= 0 && xx < sizeBoard) {
+            document.getElementById(String(xx) + "-" + String(y)).classList.add("dropZoneShip");
+            shipCoordinate.push([xx, y]);
+          }
+        }
+      } else {
+
+      };
+
+
+    })})
+    // cells.forEach(elm => {elm.addEventListener("dragleave", function(event) {
+    //   let c = event.target.id.split('-');
+    //   let x = Number(c[0]);
+    //   let y = Number(c[1]);
+    //   if (direction == "h") {
+    //     for (let xx = x + correctCoordX; xx < sizeShip - idcell.split('-')[0] + x; xx++) {
+    //       if (xx >= 0 && xx < sizeBoard) {
+    //         document.getElementById(String(xx) + "-" + String(y)).classList.remove("dropZoneShip");
+    //       }
+    //     }
+    //   } else {
+
+    //   };
+    // })})
+
+    cells.forEach(elm => {elm.addEventListener("dragover", function(event) {
+      event.preventDefault();
+    })})
+
+    cells.forEach(elm => {elm.addEventListener("drop", (event) => {
+
+    })})
+
+
+
     const buttonAutoPlaceShip = document.querySelector(".buttonAutoPlaceShip");
     return new Promise(function (resolve, reject) {
       buttonAutoPlaceShip.addEventListener("click", function() {
@@ -360,49 +513,49 @@ const game = function() {
     while (!(game.readyGame().readyPlayer1 && game.readyGame().readyPlayer2)) {
       if (game.getQueue().player1) {
         await view.changeOfQueue(namePlayer1);
-        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         while (!game.readyGame().readyPlayer1) {
-          const place = await listen.boardPlacement();
+          const place = await listen.boardPlacement(amountShips, sizeBoard);
           if (place === "auto" || typeGame > 2) {
             game.autoPlacementShip(namePlayer1);
           } else {
             game.placementShip(namePlayer1, place.x, place.y);
           };
-          view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+          view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         };
         await view.changeOfQueue(namePlayer2);
-        view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
+        view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         while (!game.readyGame().readyPlayer2) {
-          const place = await listen.boardPlacement();
+          const place = await listen.boardPlacement(amountShips, sizeBoard);
           if (place === "auto" || typeGame > 1) {
             game.autoPlacementShip(namePlayer2);
           } else {
             game.placementShip(namePlayer2, place.x, place.y);
           };
-          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
+          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         };
       } else {
         await view.changeOfQueue(namePlayer2);
-        view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
+        view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         while (!game.readyGame().readyPlayer2) {
-          const place = await listen.boardPlacement();
+          const place = await listen.boardPlacement(amountShips, sizeBoard);
           if (place === "auto" || typeGame > 1) {
             game.autoPlacementShip(namePlayer2);
           } else {
             game.placementShip(namePlayer2, place.x, place.y);
           };
-          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
+          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         };
         await view.changeOfQueue(namePlayer1);
-        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         while (!game.readyGame().readyPlayer1) {
-          const place = await listen.boardPlacement();
+          const place = await listen.boardPlacement(amountShips,sizeBoard);
           if (place === "auto" || typeGame > 2) {
             game.autoPlacementShip(namePlayer1);
           } else {
             game.placementShip(namePlayer1, place.x, place.y);
           };
-          view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+          view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         };
       };
     };

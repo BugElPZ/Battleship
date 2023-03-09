@@ -10,16 +10,32 @@
   gap: 50px;
 }
 
+.contShip {
+  display: flex;
+  flex-basis: 9;
+  gap: 20px;
+}
+
+.bodyShip {
+  display: flex;
+  background-color: aqua;
+}
+
+.cellShip {
+  height: 23px;
+  width: 23px;
+  background-color: rgb(209, 209, 209);
+}
 
 .containerBoard {
   display: grid;
   grid-template-columns: repeat(11, 25px);
   grid-template-rows: repeat(11, 25px);
-  background-color: rgb(173, 173, 173);
+  background-color: rgb(209, 209, 209);
 }
 
 .cellenemyBoardL, .cellmyBoardL {
-  border:ridge;
+  border: 1px solid rgb(182, 182, 182);
   text-align: center;
 }
 
@@ -27,5 +43,60 @@
   text-align: center;
 }
 
+.cellShip1111 {
+  border-top: 2px solid green;
+  border-right: 2px solid green;
+  border-bottom: 2px solid green;
+  border-left: 2px solid green;
+}
 
+.cellShip0101 {
+  /* border-top: none; */
+  border-right: 2px solid green;
+  /* border-bottom: none; */
+  border-left: 2px solid green;
+}
 
+.cellShip1010 {
+  border-top: 2px solid green;
+  /* border-right: none; */
+  border-bottom: 2px solid green;
+  /* border-left: none; */
+}
+
+.cellShip0111 {
+  /* border-top: none; */
+  border-right: 2px solid green;
+  border-bottom: 2px solid green;
+  border-left: 2px solid green;
+}
+
+.cellShip1011 {
+  border-top: 2px solid green;
+  /* border-right: none; */
+  border-bottom: 2px solid green;
+  border-left: 2px solid green;
+}
+
+.cellShip1101 {
+  border-top: 2px solid green;
+  border-right: 2px solid green;
+  /* border-bottom: none; */
+  border-left: 2px solid green;
+}
+
+.cellShip1110 {
+  border-top: 2px solid green;
+  border-right: 2px solid green;
+  border-bottom: 2px solid green;
+  /* border-left: none; */
+}
+
+.draggedShip {
+  background-color: green;
+  opacity: 0.5;
+}
+
+.dropZoneShip {
+  background-color: red;
+}
