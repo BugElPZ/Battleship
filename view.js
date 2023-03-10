@@ -552,8 +552,8 @@ const listener = function() {
 
 const game = function() {
 
-  let namePlayer1;
-  let namePlayer2;
+  let namePlayer1 = "1";
+  let namePlayer2 = "2";
   // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3
   let typeGame;
   let sizeBoard = 10;
@@ -569,8 +569,8 @@ const game = function() {
     view.createStartMenu();
 
     const settingsGame = await listen.startMenu();
-    namePlayer1 = settingsGame.namePlayer1;
-    namePlayer2 = settingsGame.namePlayer2;
+    namePlayer1 += settingsGame.namePlayer1;
+    namePlayer2 += settingsGame.namePlayer2;
     typeGame = settingsGame.typeGame;
     sizeBoard = settingsGame.sizeBoard;
     amountShips = settingsGame.amountShips;
@@ -643,39 +643,60 @@ const game = function() {
   let resaltGame = -1;
 
   async function battle() {
-    if (game.getQueue().player1) {
-      await view.changeOfQueue(namePlayer1);
-    } else {
-      await view.changeOfQueue(namePlayer2);
-    };
-    while (resaltGame != 2) {
+    if (typeGame == 1) {
       if (game.getQueue().player1) {
-        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
-        if (typeGame === 3) {
-          resaltGame = game.ai(namePlayer1);
+        await view.changeOfQueue(namePlayer1);
+      } else {
+        await view.changeOfQueue(namePlayer2);
+      };
+      while (resaltGame != 2) {
+        if (game.getQueue().player1) {
           view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
-        } else {
           let coord = await listen.attack();
           coord = coord.split('-');
           resaltGame = game.attack(namePlayer1, coord[0], coord[1]);
           view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
-        };
-      } else {
-        view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
-        if (typeGame > 1) {
-          resaltGame = game.ai(namePlayer2);
-          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
         } else {
+          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
           let coord = await listen.attack();
           coord = coord.split('-');
           resaltGame = game.attack(namePlayer2, coord[0], coord[1]);
           view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
         };
+        if (game.getQueue().player1) {
+          await view.changeOfQueue(namePlayer1);
+        } else {
+          await view.changeOfQueue(namePlayer2);
+        };
       };
-      if (game.getQueue().player1) {
-        await view.changeOfQueue(namePlayer1);
-      } else {
-        await view.changeOfQueue(namePlayer2);
+    } else if (typeGame == 2) {
+      while (resaltGame != 2) {
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+        if (game.getQueue().player1) {
+          let coord = await listen.attack();
+          coord = coord.split('-');
+          resaltGame = game.attack(namePlayer1, coord[0], coord[1]);
+        } else {
+          resaltGame = game.ai(namePlayer2);
+        };
+      };
+    } else if (typeGame == 3) {
+      while (resaltGame != 2) {
+        const sleep = function(ms) {
+          return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+          });
+        }
+        let sl = await sleep(200)
+        const boardP1 = game.getBoards(namePlayer1).myBoard;
+        const boardP2 = game.getBoards(namePlayer2).myBoard;
+        const AIbords = {myBoard: boardP1, enemyBoard: boardP2};
+        view.createGamePlace(namePlayer1, AIbords);
+        if (game.getQueue().player1) {
+          resaltGame = game.ai(namePlayer1);
+        } else {
+          resaltGame = game.ai(namePlayer2);
+        };
       };
     };
   };
@@ -688,6 +709,7 @@ const game = function() {
 
   startGame();
 };
+
 
 game();
 

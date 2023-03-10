@@ -399,11 +399,13 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
   let step2AIP1 = [];
   let stepAfterWoundP1 = [];
   let chooseStep1P1 = Math.floor(Math.random() * 10) > 4;
+  let visitedP1 = new Set();
 
   let step1AIP2 = [];
   let step2AIP2 = [];
   let stepAfterWoundP2 = [];
   let chooseStep1P2 = Math.floor(Math.random() * 10) > 5;
+  let visitedP2 = new Set();
 
   for (let yy = 0; yy < sizeBoard; yy++) {
     for (let xx = 0; xx < sizeBoard; xx++) {
@@ -418,11 +420,34 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
   };
 
   const ai = function(name) {
+    const convertStrToNum = function(coordStr) {
+      const arr = coordStr.split(',')
+      return {x: arr[0], y: arr[1]};
+    };
+    const convertNumToStr = function(x, y) {
+      return String(x) + "," + String(y);
+    };
+    const checkVisit = function(name, x, y) {
+      if (name == namePlayer1) {
+        if (visitedP1.has(convertNumToStr(x,y))) {
+          return true;
+        } else {
+          return false;
+        };
+      } else {
+        if (visitedP2.has(convertNumToStr(x,y))) {
+          return true;
+        } else {
+          return false;
+        };
+      };
+    };
     let step1AI;
     let step2AI;
     let stepAfterWound;
     let chooseStep1;
     let p;
+
     if (name == namePlayer1) {
       step1AI = step1AIP1;
       step2AI = step2AIP1;
@@ -461,16 +486,16 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i--;
             };
-            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff" && !checkVisit(name, i, yy)) ? stepAfterWound.push([i, yy]) : null;
             i = xx;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i++;
             };
-            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff" && !checkVisit(name, i, yy)) ? stepAfterWound.push([i, yy]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-          } else if (p.boardEnemy.stateCell(xx - 1, yy) == "null") {
+          } else if (p.boardEnemy.stateCell(xx - 1, yy) == "null" && !checkVisit(name, xx-1, yy)) {
             tempStack.push([xx-1, yy]);
           };
         };
@@ -482,16 +507,16 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i--;
             };
-            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff" && !checkVisit(name, xx, i)) ? stepAfterWound.push([xx, i]) : null;
             i = yy;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i++;
             };
-            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff" && !checkVisit(name, xx, i)) ? stepAfterWound.push([xx, i]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-          } else if (p.boardEnemy.stateCell(xx, yy-1) == "null") {
+          } else if (p.boardEnemy.stateCell(xx, yy-1) == "null" && !checkVisit(name, xx, yy-1)) {
             tempStack.push([xx, yy-1]);
           };
         };
@@ -503,16 +528,16 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i--;
             };
-            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff" && !checkVisit(name, i, yy)) ? stepAfterWound.push([i, yy]) : null;
             i = xx;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(i, yy) == "hit") {
               i++;
             };
-            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff") ? stepAfterWound.push([i, yy]) : null;
+            (0 <= i && i < sizeBoard && i != xx && p.boardEnemy.stateCell(i, yy) != "muff" && !checkVisit(name, i, yy)) ? stepAfterWound.push([i, yy]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-          } else if (p.boardEnemy.stateCell(xx + 1, yy) == "null") {
+          } else if (p.boardEnemy.stateCell(xx + 1, yy) == "null" && !checkVisit(name, xx+1, yy)) {
             tempStack.push([xx+1, yy]);
           };
         };
@@ -524,16 +549,16 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i--;
             };
-            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff" && !checkVisit(name, xx, i)) ? stepAfterWound.push([xx, i]) : null;
             i = yy;
             while (0 <= i && i < sizeBoard - 1 && p.boardEnemy.stateCell(xx, i) == "hit") {
               i++;
             };
-            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff") ? stepAfterWound.push([xx, i]) : null;
+            (0 <= i && i < sizeBoard && i != yy && p.boardEnemy.stateCell(xx, i) != "muff" && !checkVisit(name, xx, i)) ? stepAfterWound.push([xx, i]) : null;
             result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
             x = stepAfterWound[0][0];
             y = stepAfterWound[0][1];
-          } else if (p.boardEnemy.stateCell(xx, yy+1) == "null") {
+          } else if (p.boardEnemy.stateCell(xx, yy+1) == "null" && !checkVisit(name, xx, yy+1)) {
             tempStack.push([xx, yy+1]);
           };
         };
@@ -574,6 +599,8 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
       if (chooseStep1 && step1AI.length > 0) {
         let ind = Math.floor(Math.random() * step1AI.length);
         result = attack(name, step1AI[ind][0], step1AI[ind][1]);
+        x = step1AI[ind][0];
+        y = step1AI[ind][1]
         if (result != -1) {
           stepAfterWound.push([step1AI[ind][0], step1AI[ind][1]]);
         };
@@ -585,6 +612,8 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
       } else {
         let ind = Math.floor(Math.random() * step2AI.length);
         result = attack(name, step2AI[ind][0], step2AI[ind][1]);
+        x = step2AI[ind][0];
+        y = step2AI[ind][1];
         if (result != -1) {
           stepAfterWound.push([step2AI[ind][0], step2AI[ind][1]]);
         };
@@ -594,6 +623,11 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
           step2AI = step2AI.slice(0, ind).concat(step2AI.slice(ind + 1, step2AI.length));
         };
       };
+    };
+    if (name == namePlayer1) {
+      visitedP1.add(String(x) + "," + String(y));
+    } else {
+      visitedP2.add(String(x) + "," + String(y));
     };
     if (result == 1 || result == 2) {
       stepAfterWound = [];
@@ -646,8 +680,13 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
       };
     };
     for (const coord of listSteps) {
+      if (name == namePlayer1) {
+        visitedP1.add(coord);
+      } else {
+        visitedP2.add(coord);
+      };
       const c = coord.split(',');
-      removeStepsAI(name, c[0], c[1]);
+      removeStepsAI(name, Number(c[0]), Number(c[1]));
     };
   };
 
