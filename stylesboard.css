@@ -18,7 +18,12 @@
 
 .bodyShip {
   display: flex;
-  background-color: aqua;
+
+}
+
+.bodyShip.ver {
+  flex-direction: column;
+
 }
 
 .cellShip {
@@ -98,5 +103,13 @@
 }
 
 .dropZoneShip {
+  background-color: rgb(167, 206, 167);
+}
+
+.busyDropZoneShip {
   background-color: red;
+}
+
+.shipStay {
+  background-color: green;
 }

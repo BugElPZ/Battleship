@@ -275,7 +275,7 @@ const createView = function() {
       contPlaceShips.appendChild(contShip);
       const bodyShip = document.createElement("div");
       bodyShip.setAttribute("draggable", "true");
-      bodyShip.className = "bodyShip";
+      bodyShip.className = "bodyShip hor";
       bodyShip.id = "bodyShip" + ships[i][0];
       contShip.appendChild(bodyShip);
       for (let j = 0; j < ships[i][0]; j++) {
@@ -307,6 +307,13 @@ const createView = function() {
 };
 
 const listener = function() {
+  const copyAmountShips = function(arr) {
+    let arr1 = [];
+    for (let i = 0; i < arr.length; i++) {
+      arr1.push([arr[i][0], arr[i][1]]);
+    };
+    return arr1;
+  }; 
 
   const startMenu = function() {
     let namePlayer1 = "";
@@ -366,91 +373,157 @@ const listener = function() {
 
   const boardPlacement = function(amountShips, sizeBoard) {
     let ship = "auto";
-    let ships =[];
+    let myShips =[];
     let idcell = null;
-    let draggedShip;
     let correctCoordX = 0;
     let correctCoordY = 0;
-    let direction = "h";
+    let direction;
     let sizeShip = 0;
-    let shipCoordinate = []
+    let shipCoordinate = [];
+    let occupiedCell = new Set();
+    let posib = true;
+    let countShips = copyAmountShips(amountShips);
+
 
     const cell = document.querySelectorAll(".cellShip");
-    cell.forEach(elm => {
-      elm.addEventListener("mousedown", function() {
+    cell.forEach(elm => {elm.addEventListener("mousedown", function() {
         idcell = elm.id;
       }, false);
     });
 
-
-
     const eventShips = document.querySelectorAll(".bodyShip");
     eventShips.forEach(elm => {elm.addEventListener("drag", function() {
       sizeShip = Number(elm.id.slice(8, elm.id.length));
-      if (direction == "h") {
+      if (elm.className.includes("hor")) {
+        direction = "hor";
+      } else {
+        direction = "ver";
+      };
+      if (elm.className.includes("hor")) {
         correctCoordX = -Number(idcell.split('-')[0]);
       } else {
-
-      }
-      console.log(elm.id);
-      console.log(idcell);
+        correctCoordY = -Number(idcell.split('-')[0]);
+      };
     })});
 
-    eventShips.forEach(elm => (elm.addEventListener("dragstart", function() {
-      draggedShip = elm;
+    eventShips.forEach(elm => (elm.addEventListener("dblclick", function() {
+      if (elm.className.includes("hor")) {
+        elm.classList.remove("hor")
+        elm.classList.add("ver")
+      } else {
+        elm.classList.remove("ver")
+        elm.classList.add("hor")
+      };
     })));
 
     const cells = document.querySelectorAll(".cellmyBoardL");
     cells.forEach(elm => {elm.addEventListener("dragenter", function(event) {
-      for (let i = 0; i < shipCoordinate.length; i++) {
-        document.getElementById(String(shipCoordinate[i][0]) + "-" + String(shipCoordinate[i][1])).classList.remove("dropZoneShip");
-      }
+      clearCell()
+      posib = true; 
       shipCoordinate = [];
       let c = event.target.id.split('-');
       let x = Number(c[0]);
       let y = Number(c[1]);
-      if (direction == "h") {
+      if (direction == "hor") {
+        for (let xx = x + correctCoordX; xx < sizeShip - idcell.split('-')[0] + x; xx++) {
+          if (xx < 0 || xx >= sizeBoard || occupiedCell.has(String(xx) + "-" + String(y))) {
+            posib = false;
+          };
+        };
+      } else {
+        for (let yy = y + correctCoordY; yy < sizeShip - idcell.split('-')[0] + y; yy++) {
+          if (yy < 0 || yy >= sizeBoard || occupiedCell.has(String(x) + "-" + String(yy))) {
+            posib = false;
+          };
+        };
+      };
+      if (direction == "hor") {
         for (let xx = x + correctCoordX; xx < sizeShip - idcell.split('-')[0] + x; xx++) {
           if (xx >= 0 && xx < sizeBoard) {
-            document.getElementById(String(xx) + "-" + String(y)).classList.add("dropZoneShip");
+            if (posib) {
+              document.getElementById(String(xx) + "-" + String(y)).classList.add("dropZoneShip");
+            } else {
+              document.getElementById(String(xx) + "-" + String(y)).classList.add("busyDropZoneShip");
+            };
             shipCoordinate.push([xx, y]);
-          }
-        }
+          };
+        };
       } else {
-
+        for (let yy = y + correctCoordY; yy < sizeShip - idcell.split('-')[0] + y; yy++) {
+          if (yy >= 0 && yy < sizeBoard) {
+            if (posib) {
+              document.getElementById(String(x) + "-" + String(yy)).classList.add("dropZoneShip");
+            } else {
+              document.getElementById(String(x) + "-" + String(yy)).classList.add("busyDropZoneShip");
+            }
+            shipCoordinate.push([x, yy]);
+          };
+        };
       };
 
-
-    })})
-    // cells.forEach(elm => {elm.addEventListener("dragleave", function(event) {
-    //   let c = event.target.id.split('-');
-    //   let x = Number(c[0]);
-    //   let y = Number(c[1]);
-    //   if (direction == "h") {
-    //     for (let xx = x + correctCoordX; xx < sizeShip - idcell.split('-')[0] + x; xx++) {
-    //       if (xx >= 0 && xx < sizeBoard) {
-    //         document.getElementById(String(xx) + "-" + String(y)).classList.remove("dropZoneShip");
-    //       }
-    //     }
-    //   } else {
-
-    //   };
-    // })})
+    })});
 
     cells.forEach(elm => {elm.addEventListener("dragover", function(event) {
       event.preventDefault();
-    })})
+    })});
 
     cells.forEach(elm => {elm.addEventListener("drop", (event) => {
+      if (posib) {
+        for (let i = 0; i < countShips.length; i++) {
+          if (countShips[i][0] == sizeShip) {
+            countShips[i][1]--;
+            if (countShips[i][1] <= 0) {
+              const b = document.querySelector(`#bodyShip${sizeShip}`);
+              b.draggable = false;
+            }
+            const count = document.querySelector(`#countShip${sizeShip}`);
+            count.textContent = " - " + String(countShips[i][1]);
+          }
+        }
+        for (let i = 0; i < shipCoordinate.length; i++) {
+          document.getElementById(String(shipCoordinate[i][0]) + "-" + String(shipCoordinate[i][1])).classList.remove("dropZoneShip");
+          document.getElementById(String(shipCoordinate[i][0]) + "-" + String(shipCoordinate[i][1])).classList.add("shipStay");
+        };
+        let arr = [sizeShip, direction];
+        myShips.push(arr.concat(shipCoordinate));
+        shipCoordinate = [];
+        addOccupaitedCell();
+      };
+      clearCell();
+    })});
 
-    })})
+    const addOccupaitedCell = function() {
+      for (let i = 0; i < myShips.length; i++) {
+        for (let c = 2; c < myShips[i].length; c++) {
+          const x = myShips[i][c][0];
+          const y = myShips[i][c][1];
+          for (let xx = x-1; xx < x+2; xx++) {
+            for (let yy = y-1; yy < y+2; yy++) {
+              if (0 <= xx && xx < sizeBoard && 0 <= yy && yy < sizeBoard) {
+                occupiedCell.add(String(xx) + "-" + String(yy));
+              };
+            };
+          };
+        };
+      };
+    };
 
+    const clearCell = function() {
+      for (let i = 0; i < shipCoordinate.length; i++) {
+        const coor = String(shipCoordinate[i][0]) + "-" + String(shipCoordinate[i][1]);
+        document.getElementById(coor).classList.remove("dropZoneShip");
+        document.getElementById(coor).classList.remove("busyDropZoneShip");
+      };
+    }
 
-
+    const buttonManualPlaceShip = document.querySelector(".buttonNextMove");
     const buttonAutoPlaceShip = document.querySelector(".buttonAutoPlaceShip");
     return new Promise(function (resolve, reject) {
       buttonAutoPlaceShip.addEventListener("click", function() {
         resolve(ship);
+      }, false);
+      buttonManualPlaceShip.addEventListener("click", function() {
+        resolve(myShips);
       }, false);
     });
   };
@@ -509,6 +582,12 @@ const game = function() {
 
   };
 
+  const receiveManualPlaceShips = function(name, place) {
+    for (let i = 0; i < place.length; i++) {
+      game.placementShip(name, place[i][2][0], place[i][2][1], place[i][0], (place[i][1] == "hor") ? 'horizontally':'vertically');
+    };
+  };
+
   async function placementOfShips() {
     while (!(game.readyGame().readyPlayer1 && game.readyGame().readyPlayer2)) {
       if (game.getQueue().player1) {
@@ -519,7 +598,7 @@ const game = function() {
           if (place === "auto" || typeGame > 2) {
             game.autoPlacementShip(namePlayer1);
           } else {
-            game.placementShip(namePlayer1, place.x, place.y);
+            receiveManualPlaceShips(namePlayer1, place);
           };
           view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         };
@@ -530,7 +609,7 @@ const game = function() {
           if (place === "auto" || typeGame > 1) {
             game.autoPlacementShip(namePlayer2);
           } else {
-            game.placementShip(namePlayer2, place.x, place.y);
+            receiveManualPlaceShips(namePlayer2, place);
           };
           view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         };
@@ -542,7 +621,7 @@ const game = function() {
           if (place === "auto" || typeGame > 1) {
             game.autoPlacementShip(namePlayer2);
           } else {
-            game.placementShip(namePlayer2, place.x, place.y);
+            receiveManualPlaceShips(namePlayer2, place);
           };
           view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         };
@@ -553,7 +632,7 @@ const game = function() {
           if (place === "auto" || typeGame > 2) {
             game.autoPlacementShip(namePlayer1);
           } else {
-            game.placementShip(namePlayer1, place.x, place.y);
+            receiveManualPlaceShips(namePlayer1, place);
           };
           view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         };
