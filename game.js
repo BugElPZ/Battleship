@@ -569,6 +569,8 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
 
         if (result == null) {
           result = attack(name, stepAfterWound[0][0], stepAfterWound[0][1]);
+          x = stepAfterWound[0][0];
+          y = stepAfterWound[0][1];
         } else {
           if (x % 2 == 0 && y % 2 == 0 || x % 2 != 0 && y % 2 != 0) {
             for (let i = 0; i < step1AI.length; i++) {
@@ -632,9 +634,7 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
     if (result == 1 || result == 2) {
       stepAfterWound = [];
     };
-    if (result == 1 && 0 <= x && x < sizeBoard && 0 <= y && y < sizeBoard) {
-      removeStepsAfterSunk(name, x, y);
-    };
+
     if (name == namePlayer1) {
       step1AIP1 = step1AI;
       step2AIP1 = step2AI;
@@ -645,6 +645,9 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
       step2AIP2 = step2AI;
       stepAfterWoundP2 = stepAfterWound;
       chooseStep1P2 = chooseStep1;
+    };
+    if (result == 1 && 0 <= x && x < sizeBoard && 0 <= y && y < sizeBoard) {
+      removeStepsAfterSunk(name, x, y);
     };
     return result;
   };
@@ -774,5 +777,5 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
 
 
 
-// console.log(game.readyGame());
+//console.log(game.readyGame());
 

@@ -528,6 +528,15 @@ const listener = function() {
     });
   };
 
+  const nextButton = function() {
+    const buttonNext = document.querySelector(".buttonNextMove");
+    return new Promise(function(resolve, reject) {
+      buttonNext.addEventListener("click", function() {
+        resolve()
+      }, false)
+    });
+  };
+
   const attack = function() {
     return new Promise(function (resolve, reject) {
       const cell = document.querySelectorAll(".cellenemyBoardL");
@@ -539,7 +548,7 @@ const listener = function() {
     });
   };
 
-  return {startMenu, boardPlacement, attack};
+  return {startMenu, boardPlacement, attack, nextButton};
 };
 
 // listenerStartMenu()
@@ -590,30 +599,36 @@ const game = function() {
 
   async function placementOfShips() {
     while (!(game.readyGame().readyPlayer1 && game.readyGame().readyPlayer2)) {
-      if (game.getQueue().player1) {
+      if (typeGame == 3) {
+        game.autoPlacementShip(namePlayer1);
+        game.autoPlacementShip(namePlayer2);
+      } else if (typeGame == 2) {
         await view.changeOfQueue(namePlayer1);
         view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         while (!game.readyGame().readyPlayer1) {
           const place = await listen.boardPlacement(amountShips, sizeBoard);
-          if (place === "auto" || typeGame > 2) {
+          if (place === "auto") {
             game.autoPlacementShip(namePlayer1);
           } else {
             receiveManualPlaceShips(namePlayer1, place);
           };
           view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
         };
-        await view.changeOfQueue(namePlayer2);
-        view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
-        while (!game.readyGame().readyPlayer2) {
-          const place = await listen.boardPlacement(amountShips, sizeBoard);
-          if (place === "auto" || typeGame > 1) {
-            game.autoPlacementShip(namePlayer2);
-          } else {
-            receiveManualPlaceShips(namePlayer2, place);
-          };
-          view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
-        };
+        await listen.nextButton();
+        game.autoPlacementShip(namePlayer2);
       } else {
+        await view.changeOfQueue(namePlayer1);
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
+        while (!game.readyGame().readyPlayer1) {
+          const place = await listen.boardPlacement(amountShips, sizeBoard);
+          if (place === "auto") {
+            game.autoPlacementShip(namePlayer1);
+          } else {
+            receiveManualPlaceShips(namePlayer1, place);
+          };
+          view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
+        };
+        await listen.nextButton();
         await view.changeOfQueue(namePlayer2);
         view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         while (!game.readyGame().readyPlayer2) {
@@ -625,17 +640,7 @@ const game = function() {
           };
           view.createGamePlace(namePlayer2, game.getBoards(namePlayer2), true, amountShips);
         };
-        await view.changeOfQueue(namePlayer1);
-        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
-        while (!game.readyGame().readyPlayer1) {
-          const place = await listen.boardPlacement(amountShips,sizeBoard);
-          if (place === "auto" || typeGame > 2) {
-            game.autoPlacementShip(namePlayer1);
-          } else {
-            receiveManualPlaceShips(namePlayer1, place);
-          };
-          view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
-        };
+        await listen.nextButton();
       };
     };
   };
@@ -663,6 +668,7 @@ const game = function() {
           resaltGame = game.attack(namePlayer2, coord[0], coord[1]);
           view.createGamePlace(namePlayer2, game.getBoards(namePlayer2));
         };
+        await listen.nextButton();
         if (game.getQueue().player1) {
           await view.changeOfQueue(namePlayer1);
         } else {
@@ -687,7 +693,7 @@ const game = function() {
             setTimeout(resolve, ms);
           });
         }
-        let sl = await sleep(200)
+        let sl = await sleep(10)
         const boardP1 = game.getBoards(namePlayer1).myBoard;
         const boardP2 = game.getBoards(namePlayer2).myBoard;
         const AIbords = {myBoard: boardP1, enemyBoard: boardP2};
@@ -705,6 +711,14 @@ const game = function() {
     await startMenu();
     await placementOfShips();
     await battle();
+    while (typeGame == 3) {
+      resaltGame = -1;
+      game = gameBattleShip(
+        namePlayer1, namePlayer2, queuePlayer1 ,sizeBoard, amountShips
+      );
+      await placementOfShips();
+      await battle();
+    }
   };
 
   startGame();
