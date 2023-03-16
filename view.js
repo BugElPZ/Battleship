@@ -64,9 +64,19 @@ const createView = function() {
     buttonAIvsAI.className = "buttonChooseTypeGame";
     buttonAIvsAI.id = "buttonAIvsAI";
     buttonAIvsAI.innerHTML = "Computer<br>vs<br>Computer";
+    const buttonLAN = document.createElement("div");
+    buttonLAN.className = "buttonChooseTypeGame";
+    buttonLAN.id = "buttonLAN";
+    buttonLAN.innerHTML = "Player<br>vs<br>LAN";
+    const buttonAiLAN = document.createElement("div");
+    buttonAiLAN.className = "buttonChooseTypeGame";
+    buttonAiLAN.id = "buttonAiLAN";
+    buttonAiLAN.innerHTML = "AI<br>vs<br>LAN";
     contChooseTypeGame.appendChild(buttonPvsP);
     contChooseTypeGame.appendChild(buttonPvsAI);
     contChooseTypeGame.appendChild(buttonAIvsAI);
+    contChooseTypeGame.appendChild(buttonLAN);
+    contChooseTypeGame.appendChild(buttonAiLAN);
 
     const titlePriority = document.createElement("div");
     titlePriority.className = "titlePriority";
@@ -86,32 +96,6 @@ const createView = function() {
     buttonPriorityP2.innerHTML = "Player 2";
     contChoosePriority.appendChild(buttonPriorityP1);
     contChoosePriority.appendChild(buttonPriorityP2);
-
-    // const contAdvancedMenu = document.createElement("div");
-    // contAdvancedMenu.className = "contAdvancedMenu";
-    // contAdvancedMenu.setAttribute('style', 'dislay: none;');
-    // menu.appendChild(contAdvancedMenu);
-    // const contSizeBoard = document.createElement("div");
-    // contSizeBoard.className = "contSizeBoard";
-    // contAdvancedMenu.appendChild(contSizeBoard);
-    // const titleSizeBoard = document.createElement("div");
-    // titleSizeBoard.className = "titleSizeBoard";
-    // titleSizeBoard.innerHTML = "Size board: ";
-    // contSizeBoard.appendChild(titleSizeBoard);
-    // const inputSizeBoard = document.createElement("input");
-    // inputSizeBoard.setAttribute('type', 'number');
-    // inputSizeBoard.setAttribute('min', '5');
-    // inputSizeBoard.setAttribute('max', '20');
-    // inputSizeBoard.setAttribute('value', '10');
-    // inputSizeBoard.className = "inputSizeBoard";
-    // contSizeBoard.appendChild(inputSizeBoard);
-    // const contShips = document.createElement("div");
-    // contShips.className = "contShips";
-    // contAdvancedMenu.appendChild(contShips);
-
-    // for (let i = 0; i < 4; i++) {
-    //   addInputShip(i);
-    // };
 
     const buttonStartGame = document.createElement("input");
     buttonStartGame.className = "buttonStartGame";
@@ -303,7 +287,15 @@ const createView = function() {
     };
   };
 
-  return {createStartMenu, changeOfQueue, createGamePlace};
+  const gameOver = function(nameWin, nameLose) {
+    clearView();
+    const gag = document.createElement("div");
+    gag.className = "gag";
+    gag.innerHTML = `Player ${nameWin.slice(1, nameWin.length)} you Win!<br><br>Player ${nameLose.slice(1, nameLose.length)} you Lose!`;
+    body.appendChild(gag);
+  };
+
+  return {createStartMenu, changeOfQueue, createGamePlace, gameOver};
 };
 
 const listener = function() {
@@ -318,7 +310,7 @@ const listener = function() {
   const startMenu = function() {
     let namePlayer1 = "";
     let namePlayer2 = "";
-    // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3
+    // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3; PlayerLAN = 4; AILAN = 5;
     let type = 0;
     let queuePlayer1 = null;
     const inputNameP1 = document.querySelector("#inputNameP1");
@@ -340,6 +332,10 @@ const listener = function() {
           type = 2;
         } else if (elem.target.id == "buttonAIvsAI") {
           type = 3;
+        } else if (elem.target.id == "buttonLAN") {
+          type = 4
+        } else if (elem.target.id == "buttonAiLAN") {
+          type = 5
         };
       }, false);
     });
@@ -353,7 +349,6 @@ const listener = function() {
         };
       }, false)
     });
-
 
     return new Promise(function (resolve, reject) {
       buttonStartGame.addEventListener("click", function() {
@@ -551,19 +546,12 @@ const listener = function() {
   return {startMenu, boardPlacement, attack, nextButton};
 };
 
-// listenerStartMenu()
-// createView()
-//   createStartMenu()
-//   changeOfQueue(namePlayer)
-//   refreshBoard(array)
-//   startChangeOfQueue()
-//   attack() -> coordinate "0,0"
 
 const game = function() {
 
   let namePlayer1 = "1";
   let namePlayer2 = "2";
-  // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3
+  // typeGame: Player vs Player = 1; Player vs AI = 2; AI vs AI = 3; LANgame = 4;
   let typeGame;
   let sizeBoard = 10;
   let amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]];
@@ -598,6 +586,22 @@ const game = function() {
   };
 
   async function placementOfShips() {
+    if (typeGame == 4) {
+      await view.changeOfQueue(namePlayer1);
+      view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
+      while (!game.readyGame().readyPlayer1) {
+        const place = await listen.boardPlacement(amountShips, sizeBoard);
+        if (place === "auto") {
+          game.autoPlacementShip(namePlayer1);
+        } else {
+          receiveManualPlaceShips(namePlayer1, place);
+        };
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1), true, amountShips);
+      };
+      await listen.nextButton();
+      return;
+    };
+    
     while (!(game.readyGame().readyPlayer1 && game.readyGame().readyPlayer2)) {
       if (typeGame == 3) {
         game.autoPlacementShip(namePlayer1);
@@ -693,32 +697,159 @@ const game = function() {
             setTimeout(resolve, ms);
           });
         }
-        let sl = await sleep(10)
+        let sl = await sleep(5)
         const boardP1 = game.getBoards(namePlayer1).myBoard;
         const boardP2 = game.getBoards(namePlayer2).myBoard;
         const AIbords = {myBoard: boardP1, enemyBoard: boardP2};
         view.createGamePlace(namePlayer1, AIbords);
         if (game.getQueue().player1) {
-          resaltGame = game.ai(namePlayer1);
+          resaltGame = game.ai(namePlayer1).result;
         } else {
-          resaltGame = game.ai(namePlayer2);
+          resaltGame = game.ai(namePlayer2).result;
+        };
+      };
+    } else if (typeGame == 4) {
+      while (resaltGame != 2) {
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+        if (queuePlayer1) {
+          let coord = await waitAttackLAN();
+          coord = coord.split('-');
+          resaltGame = game.attack(namePlayer1, coord[0], coord[1]);
+          lanPlayer.send(JSON.stringify({
+            name: "P2",
+            type: "result",
+            data: resaltGame,
+          }));
+          if (resaltGame == -1) {
+            game.setQueue(false);
+            queuePlayer1 = false;
+          };
+        } else {
+          let coord = await listen.attack();
+          coord = coord.split('-');
+          resaltGame = await attackLAN(coord[0], coord[1]);
+          if (resaltGame == -1) {
+            game.setQueue(true);
+            queuePlayer1 = true;
+          };
+        };
+      };
+    } else if (typeGame == 5) {
+      while (resaltGame != 2) {
+        view.createGamePlace(namePlayer1, game.getBoards(namePlayer1));
+        if (queuePlayer1) {
+          let coord = await waitAttackLAN();
+          coord = coord.split('-');
+          resaltGame = game.ai(namePlayer1).result;
+          lanPlayer.send(JSON.stringify({
+            name: "P2",
+            type: "result",
+            data: resaltGame,
+          }));
+          if (resaltGame == -1) {
+            game.setQueue(false);
+            queuePlayer1 = false;
+          };
+        } else {
+          let coord = await listen.attack();
+          coord = coord.split('-');
+          resaltGame = await attackLAN(coord[0], coord[1]);
+          if (resaltGame == -1) {
+            game.setQueue(true);
+            queuePlayer1 = true;
+          };
         };
       };
     };
   };
 
+  let lanPlayer;
+
+  async function connectLAN() {
+    const conn = new WebSocket("ws://192.168.1.195:9098");
+    console.log("connect");
+    conn.onmessage = (event) => {
+      console.log(event.data);
+      const data = JSON.parse(event.data);
+      queuePlayer1 = data.data;
+    };
+    lanPlayer = conn;
+    conn.onopen = (e) => {
+      conn.send(JSON.stringify({
+        name: "P2",
+        type: "state",
+        data: true,
+      }));
+    }
+
+  };
+
+  async function readyLAN() {
+    lanPlayer.send(JSON.stringify({
+      name: "P2",
+      type: "state",
+      data: true,
+    }));
+    return new Promise(function(resolve, reject) {
+      lanPlayer.onmessage = (e) => {
+        e = JSON.parse(e.data)
+        console.log(e, "readyLAN");
+        if (e.type == "state" && e.data) {
+          resolve();
+        };
+      };
+    });
+  };
+
+  async function attackLAN (x, y) {
+    lanPlayer.send(JSON.stringify({
+      name: "P2",
+      type: "attack",
+      data: String(x) + "," + String(y),
+    }));
+    return new Promise( function(resolve, reject) {
+      lanPlayer.onmessage = (e) => {
+        e = JSON.parse(e.data)
+        console.log(e, "attackLAN");
+        if (e.type == "result") {
+          resolve(e.data);
+        };
+      };
+    });
+  };
+
+  async function waitAttackLAN () {
+    return new Promise ( function(resolve, reject) {
+      lanPlayer.onmessage = (e) => {
+        e = JSON.parse(e.data)
+        if (e.type == "attack") {
+          resolve(e.data);
+        };
+      };
+    })
+  }
+
   async function startGame() {
     await startMenu();
-    await placementOfShips();
-    await battle();
-    while (typeGame == 3) {
-      resaltGame = -1;
-      game = gameBattleShip(
-        namePlayer1, namePlayer2, queuePlayer1 ,sizeBoard, amountShips
-      );
+    if (typeGame == 4 || typeGame == 5) {
+      await connectLAN();
+      await placementOfShips();
+      await readyLAN();
+      console.log("battle")
+      await battle();
+
+    } else {
       await placementOfShips();
       await battle();
-    }
+      while (typeGame == 3) {
+        resaltGame = -1;
+        game = gameBattleShip(
+          namePlayer1, namePlayer2, queuePlayer1 ,sizeBoard, amountShips
+        );
+        await placementOfShips();
+        await battle();
+      };
+    };
   };
 
   startGame();
@@ -727,11 +858,3 @@ const game = function() {
 
 game();
 
-// const game1 = gameBattleShip("1", "2", true);
-// game1.autoPlacementShip("1");
-// game1.autoPlacementShip("2");
-
-// const v = createView();
-// v.createGamePlace("1", game1.getBoards("1"));
-// v.createStartMenu();
-// v.changeOfQueue("dkjfhsdf");

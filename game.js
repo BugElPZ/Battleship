@@ -210,7 +210,7 @@ const gameboard = function(sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2]
 
 const player = function(name, sizeBoard = 10, amountShips = [[5, 1], [4, 1], [3, 2], [2, 1]]) {
   let board = gameboard(sizeBoard, amountShips);
-  let boardEnemy = gameboard();
+  let boardEnemy = gameboard(sizeBoard);
 
   const receiveAttack = function(x, y) {
     if (x < 0 && sizeBoard <= x && y < 0 && sizeBoard <= y) {
@@ -299,6 +299,10 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
       return {player1: false,
               player2: true};
     };
+  };
+
+  const setQueue = function(moveP1) {
+    queuePlayer1 = moveP1;
   };
 
   // return resalt attack: -1 - "muff", 0 - "hit", 1 - that ship sunk, 2 - all ships sunk
@@ -649,7 +653,7 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
     if (result == 1 && 0 <= x && x < sizeBoard && 0 <= y && y < sizeBoard) {
       removeStepsAfterSunk(name, x, y);
     };
-    return result;
+    return {result, x, y};
   };
 
   const removeStepsAfterSunk = function(name, x, y) {
@@ -734,9 +738,16 @@ const gameBattleShip = function(p1, p2, queuePlayer1 = true, sizeBoard = 10, amo
   };
 
 
-  return { getQueue, placementShip, autoPlacementShip, getBoards, readyGame, attack, ai }
+  return { setQueue, getQueue, placementShip, autoPlacementShip, getBoards, readyGame, attack, ai }
 };
 
+const copyAmountShips = function(arr) {
+  let arr1 = [];
+  for (let i = 0; i < arr.length; i++) {
+    arr1.push([arr[i][0], arr[i][1]]);
+  };
+  return arr1;
+}; 
 
 // module.exports = {ship, gameboard, player, gameBattleShip};
 
